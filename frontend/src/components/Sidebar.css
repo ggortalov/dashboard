@@ -10,7 +10,8 @@
   z-index: 100;
   font-family: var(--font-sans);
   transition: width 0.25s ease;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .sidebar--collapsed {
@@ -76,7 +77,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  overflow: hidden;
   min-width: 0;
   text-decoration: none;
 }
@@ -84,17 +84,13 @@
 .sidebar-logo-img {
   width: 42px;
   height: 42px;
-  border-radius: 11px;
+  border-radius: var(--radius-full);
   object-fit: cover;
   flex-shrink: 0;
-  filter: hue-rotate(-65deg) saturate(0.5) brightness(1.1);
-  background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
-  padding: 3px;
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.3),
-    0 6px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    0 6px 12px rgba(0, 0, 0, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
 }
 
 .sidebar-logo-wordmark {
@@ -108,14 +104,19 @@
 .sidebar-logo-name {
   color: #fff;
   font-family: var(--font-sans);
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: -0.6px;
+  letter-spacing: -0.4px;
+  line-height: 1.3;
 }
 
 .sidebar-logo-accent {
   font-weight: 300;
   opacity: 0.7;
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .sidebar-collapse-btn {

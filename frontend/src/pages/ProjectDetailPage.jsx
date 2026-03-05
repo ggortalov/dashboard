@@ -8,6 +8,7 @@ import StatusBadge from '../components/StatusBadge';
 import projectService from '../services/projectService';
 import suiteService from '../services/suiteService';
 import runService from '../services/runService';
+import { getStatusChartData } from '../constants/statusColors';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import './ProjectDetailPage.css';
@@ -115,14 +116,7 @@ export default function ProjectDetailPage() {
 
   if (loading) return <><Header breadcrumbs={[{ label: 'Dashboard', path: '/' }, { label: 'Loading...' }]} /><LoadingSpinner /></>;
 
-  const chartData = stats ? {
-    labels: ['Passed', 'Failed', 'Blocked', 'Retest', 'Untested'],
-    datasets: [{
-      data: [stats.Passed, stats.Failed, stats.Blocked, stats.Retest, stats.Untested],
-      backgroundColor: ['#4CAF50', '#F44336', '#FF9800', '#00897B', '#9E9E9E'],
-      borderWidth: 0,
-    }],
-  } : null;
+  const chartData = stats ? getStatusChartData(stats) : null;
 
   const total = stats ? stats.Passed + stats.Failed + stats.Blocked + stats.Retest + stats.Untested : 0;
 

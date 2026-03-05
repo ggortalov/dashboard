@@ -1,4 +1,4 @@
-# StyleGuard — Test Management Application
+# StyleSeat Guardian — Test Management Application
 
 A TestRail-like test management web application with a React frontend and Flask REST API backend. Features a modern design system with DM Sans typography, tinted status/priority badges, smooth animations, collapsible sidebar, responsive mobile layout, and user avatar uploads.
 
@@ -217,9 +217,9 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 - **Charts**: `react-chartjs-2` Doughnut charts for test result distribution
 
 ### Design System
-- **Brand logo**: Lion icon (`public/logo.jpg`) displayed in sidebar header and auth pages; CSS `hue-rotate(-65deg) saturate(0.5)` shifts original blue to forest green matching the app palette; multi-layer box-shadow for depth
+- **Brand logo**: Green lion icon (`public/logo.jpg`) displayed in sidebar header and auth pages; logo is natively green so no hue-shift filter needed; multi-layer box-shadow for depth
 - **Color scheme**: Fully green-themed — `btn-primary`, `btn-secondary`, `btn-danger`, input focus rings, and active tabs all use `--sidebar-bg` (#1a3a2a) green instead of blue. Buttons use outlined style (white bg + colored border) that fills on hover
-- **Typography**: DM Sans (Google Fonts) as primary font via `--font-sans` variable; sidebar brand uses "Style" (semibold) + "Guard" (light weight) split for Apple-style wordmark
+- **Typography**: DM Sans (Google Fonts) as primary font via `--font-sans` variable; sidebar brand uses "StyleSeat" (semibold) + "Guardian" (light weight) split for Apple-style wordmark
 - **CSS architecture**: Design tokens in `styles/variables.css`, component-scoped CSS files, global styles in `index.css`
 - **Shadows**: Multi-layer elevation system (`--shadow-xs` through `--shadow-xl`)
 - **Border radii**: Rounded scale (`--radius-sm: 6px` through `--radius-full: 9999px`)
@@ -231,11 +231,11 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 
 ### Status & Priority Values
 - **Test statuses**: `Passed`, `Failed`, `Blocked`, `Retest`, `Untested`
-- **Status colors**: Passed=#4CAF50, Failed=#F44336, Blocked=#FF9800, Retest=#2196F3, Untested=#9E9E9E
-- **Status tint backgrounds**: Passed=#e8f5e9, Failed=#ffebee, Blocked=#fff3e0, Retest=#e3f2fd, Untested=#f5f5f5
+- **Status colors**: Passed=#4CAF50, Failed=#F44336, Blocked=#FF9800, Retest=#00897B, Untested=#9E9E9E
+- **Status tint backgrounds**: Passed=#e8f5e9, Failed=#ffebee, Blocked=#fff3e0, Retest=#e0f2f1, Untested=#f5f5f5
 - **Priorities**: `Critical`, `High`, `Medium`, `Low`
-- **Priority colors**: Critical=#d32f2f, High=#f57c00, Medium=#1976d2, Low=#757575
-- **Priority tint backgrounds**: Critical=#ffebee, High=#fff3e0, Medium=#e3f2fd, Low=#f5f5f5
+- **Priority colors**: Critical=#d32f2f, High=#f57c00, Medium=#2e7d4f, Low=#757575
+- **Priority tint backgrounds**: Critical=#ffebee, High=#fff3e0, Medium=#e8f5e9, Low=#f5f5f5
 - **Case types**: `Functional`, `Regression`, `Smoke`, `Performance`, `Security`, `Usability`, `Other`
 
 ## Common Development Tasks

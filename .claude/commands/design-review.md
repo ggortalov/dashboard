@@ -1,4 +1,4 @@
-# StyleGuard Design Review & Implementation Skill
+# StyleSeat Guardian Design Review & Implementation Skill
 
 When applying design changes or building new UI components for this project, follow these established design principles and patterns.
 
@@ -21,7 +21,7 @@ When applying design changes or building new UI components for this project, fol
 ## Brand Identity
 
 - **Logo**: Lion image at `/logo.jpg` with CSS filter `hue-rotate(-65deg) saturate(0.5)` to match green palette
-- **Wordmark**: "Style" (font-weight: 600) + "Guard" (font-weight: 300, reduced opacity) — weight contrast creates hierarchy
+- **Wordmark**: "StyleSeat" (font-weight: 600) + "Guardian" (font-weight: 300, reduced opacity) — weight contrast creates hierarchy
 - **Sidebar logo**: 42px with rounded corners, padding, multi-layer shadow for depth
 - **Auth page logo**: 96px centered lockup with icon + wordmark + tagline, Apple-style
 

@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import runService from '../services/runService';
+import { getStatusChartData } from '../constants/statusColors';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import './TestRunDetailPage.css';
@@ -38,14 +39,7 @@ export default function TestRunDetailPage() {
   if (loading) return <><Header breadcrumbs={[{ label: 'Dashboard', path: '/' }]} /><LoadingSpinner /></>;
 
   const stats = run?.stats || {};
-  const chartData = {
-    labels: ['Passed', 'Failed', 'Blocked', 'Retest', 'Untested'],
-    datasets: [{
-      data: [stats.Passed, stats.Failed, stats.Blocked, stats.Retest, stats.Untested],
-      backgroundColor: ['#4CAF50', '#F44336', '#FF9800', '#00897B', '#9E9E9E'],
-      borderWidth: 0,
-    }],
-  };
+  const chartData = getStatusChartData(stats);
 
   const statuses = ['All', 'Passed', 'Failed', 'Blocked', 'Retest', 'Untested'];
   const filtered = filter === 'All' ? results : results.filter((r) => r.status === filter);

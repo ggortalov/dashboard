@@ -29,8 +29,9 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <img src="/logo.jpg" alt="StyleGuard" className="auth-brand-icon" />
-          <h1 className="auth-brand-name">Style<span className="auth-brand-accent">Guard</span></h1>
+          <img src="/logo.png" alt="StyleSeat Regression Guard" className="auth-brand-icon" />
+          <h1 className="auth-brand-name">StyleSeat</h1>
+          <span className="auth-brand-subtitle">Regression Guard</span>
           <p className="auth-brand-tagline">Test Management</p>
         </div>
 

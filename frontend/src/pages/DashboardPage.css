@@ -6,6 +6,12 @@
   animation: slideUp 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* Dashboard section */
 .dashboard-section {
   background: var(--bg-subtle);

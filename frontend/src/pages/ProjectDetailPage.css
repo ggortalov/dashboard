@@ -66,6 +66,12 @@
   gap: 24px;
 }
 
+@media (max-width: 768px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .summary-list {
   display: flex;
   flex-direction: column;

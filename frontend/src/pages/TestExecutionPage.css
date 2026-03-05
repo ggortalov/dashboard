@@ -143,3 +143,9 @@
   color: var(--status-failed);
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .exec-layout {
+    grid-template-columns: 1fr;
+  }
+}

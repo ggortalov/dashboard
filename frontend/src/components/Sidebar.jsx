@@ -88,10 +88,10 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
     >
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <img src="/logo.jpg" alt="StyleGuard" className="sidebar-logo-img" />
+          <img src="/logo.png" alt="StyleSeat Guardian" className="sidebar-logo-img" />
           {!collapsed && (
             <div className="sidebar-logo-wordmark">
-              <span className="sidebar-logo-name">Style<span className="sidebar-logo-accent">Guard</span></span>
+              <span className="sidebar-logo-name">StyleSeat <span className="sidebar-logo-accent">Regression Guard</span></span>
             </div>
           )}
         </div>

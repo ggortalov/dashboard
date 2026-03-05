@@ -1,3 +1,5 @@
+import './PriorityBadge.css';
+
 const priorityStyles = {
   Critical: { color: 'var(--priority-critical)', bg: 'var(--priority-critical-bg)' },
   High:     { color: 'var(--priority-high)',     bg: 'var(--priority-high-bg)' },
@@ -8,17 +10,10 @@ const priorityStyles = {
 export default function PriorityBadge({ priority }) {
   const style = priorityStyles[priority] || priorityStyles.Medium;
   return (
-    <span style={{
-      color: style.color,
-      backgroundColor: style.bg,
-      fontWeight: 600,
-      fontSize: '12px',
-      padding: '3px 10px',
-      borderRadius: '9999px',
-      display: 'inline-flex',
-      alignItems: 'center',
-      lineHeight: 1,
-    }}>
+    <span
+      className="priority-badge"
+      style={{ color: style.color, backgroundColor: style.bg }}
+    >
       {priority}
     </span>
   );
