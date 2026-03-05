@@ -1,0 +1,223 @@
+import json
+from datetime import datetime, timezone
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from app import db
+
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class Project(db.Model):
+    __tablename__ = "projects"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
+                           onupdate=lambda: datetime.now(timezone.utc))
+
+    suites = db.relationship("Suite", backref="project", cascade="all, delete-orphan", lazy=True)
+    test_runs = db.relationship("TestRun", backref="project", cascade="all, delete-orphan", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class Suite(db.Model):
+    __tablename__ = "suites"
+
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    sections = db.relationship("Section", backref="suite", cascade="all, delete-orphan", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "name": self.name,
+            "description": self.description,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class Section(db.Model):
+    __tablename__ = "sections"
+
+    id = db.Column(db.Integer, primary_key=True)
+    suite_id = db.Column(db.Integer, db.ForeignKey("suites.id", ondelete="CASCADE"), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey("sections.id", ondelete="CASCADE"), nullable=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    display_order = db.Column(db.Integer, default=0)
+
+    children = db.relationship("Section", backref=db.backref("parent", remote_side=[id]),
+                               cascade="all, delete-orphan", lazy=True)
+    test_cases = db.relationship("TestCase", backref="section", cascade="all, delete-orphan", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "suite_id": self.suite_id,
+            "parent_id": self.parent_id,
+            "name": self.name,
+            "description": self.description,
+            "display_order": self.display_order,
+        }
+
+
+class TestCase(db.Model):
+    __tablename__ = "test_cases"
+
+    id = db.Column(db.Integer, primary_key=True)
+    section_id = db.Column(db.Integer, db.ForeignKey("sections.id", ondelete="CASCADE"), nullable=False)
+    title = db.Column(db.String(500), nullable=False)
+    case_type = db.Column(db.String(50), default="Functional")
+    priority = db.Column(db.String(20), default="Medium")
+    preconditions = db.Column(db.Text, nullable=True)
+    steps = db.Column(db.Text, nullable=True)  # JSON string
+    expected_result = db.Column(db.Text, nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
+                           onupdate=lambda: datetime.now(timezone.utc))
+
+    @property
+    def steps_list(self):
+        return json.loads(self.steps) if self.steps else []
+
+    @steps_list.setter
+    def steps_list(self, value):
+        self.steps = json.dumps(value)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "section_id": self.section_id,
+            "title": self.title,
+            "case_type": self.case_type,
+            "priority": self.priority,
+            "preconditions": self.preconditions,
+            "steps": self.steps_list,
+            "expected_result": self.expected_result,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class TestRun(db.Model):
+    __tablename__ = "test_runs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    suite_id = db.Column(db.Integer, db.ForeignKey("suites.id"), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    completed_at = db.Column(db.DateTime, nullable=True)
+    is_completed = db.Column(db.Boolean, default=False)
+
+    suite = db.relationship("Suite", backref="test_runs_rel")
+    results = db.relationship("TestResult", backref="test_run", cascade="all, delete-orphan", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "suite_id": self.suite_id,
+            "name": self.name,
+            "description": self.description,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "is_completed": self.is_completed,
+        }
+
+
+class TestResult(db.Model):
+    __tablename__ = "test_results"
+
+    id = db.Column(db.Integer, primary_key=True)
+    run_id = db.Column(db.Integer, db.ForeignKey("test_runs.id", ondelete="CASCADE"), nullable=False)
+    case_id = db.Column(db.Integer, db.ForeignKey("test_cases.id"), nullable=False)
+    status = db.Column(db.String(20), default="Untested")
+    comment = db.Column(db.Text, nullable=True)
+    defect_id = db.Column(db.String(100), nullable=True)
+    tested_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    tested_at = db.Column(db.DateTime, nullable=True)
+
+    test_case = db.relationship("TestCase", backref="results")
+    history = db.relationship("ResultHistory", backref="result", cascade="all, delete-orphan", lazy=True,
+                              order_by="ResultHistory.changed_at.desc()")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "run_id": self.run_id,
+            "case_id": self.case_id,
+            "status": self.status,
+            "comment": self.comment,
+            "defect_id": self.defect_id,
+            "tested_by": self.tested_by,
+            "tested_at": self.tested_at.isoformat() if self.tested_at else None,
+        }
+
+
+class ResultHistory(db.Model):
+    __tablename__ = "result_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    result_id = db.Column(db.Integer, db.ForeignKey("test_results.id", ondelete="CASCADE"), nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    defect_id = db.Column(db.String(100), nullable=True)
+    changed_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    changed_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "result_id": self.result_id,
+            "status": self.status,
+            "comment": self.comment,
+            "defect_id": self.defect_id,
+            "changed_by": self.changed_by,
+            "changed_at": self.changed_at.isoformat() if self.changed_at else None,
+        }
