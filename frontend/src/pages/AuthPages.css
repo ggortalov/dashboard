@@ -4,16 +4,100 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(160deg, #0a1a10 0%, #1a3a2a 40%, #244734 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Halo glow behind card */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(205, 245, 69, 0.15) 0%,
+    rgba(78, 168, 109, 0.10) 30%,
+    rgba(26, 58, 42, 0.05) 60%,
+    transparent 80%
+  );
+  animation: haloAppear 0.5s ease-out forwards, haloBreath 4s ease-in-out 0.5s infinite;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Secondary outer ring */
+.auth-page::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(78, 168, 109, 0.06) 0%,
+    rgba(26, 58, 42, 0.03) 40%,
+    transparent 70%
+  );
+  animation: haloAppear 0.6s ease-out forwards, haloBreath 4s ease-in-out 0.6s infinite;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes haloAppear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes haloBreath {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
 }
 
 .auth-card {
   background: var(--bg-white);
   border-radius: var(--radius-xl);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 50px rgba(205, 245, 69, 0.55),
+    0 0 120px rgba(205, 245, 69, 0.45),
+    0 0 250px rgba(205, 245, 69, 0.3),
+    0 0 450px rgba(78, 168, 109, 0.2),
+    0 0 650px rgba(78, 168, 109, 0.1);
   padding: 48px 40px 40px;
   width: 100%;
   max-width: 400px;
-  animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: authCardBloom 0.4s ease-out forwards, auraBoom 0.5s ease-out 0.35s forwards, auroraGlow 6s ease-in-out 0.9s infinite;
+  position: relative;
+  z-index: 1;
+}
+
+/* Content fades in after bloom */
+.auth-card > * {
+  opacity: 0;
+  animation: authContentReveal 0.3s ease-out 0.25s forwards;
 }
 
 /* Brand block — Apple-style centered lockup */
@@ -143,6 +227,125 @@
   text-decoration: underline;
 }
 
+@keyframes authCardBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+    border-radius: 200px;
+    box-shadow:
+      0 0 4px rgba(205, 245, 69, 0.3),
+      0 0 8px rgba(100, 220, 180, 0.2);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(0.25);
+    border-radius: 180px;
+    box-shadow:
+      0 0 20px rgba(205, 245, 69, 0.4),
+      0 0 40px rgba(100, 220, 180, 0.3),
+      0 0 80px rgba(60, 180, 220, 0.15);
+  }
+  50% {
+    transform: scale(0.5);
+    border-radius: 140px;
+    box-shadow:
+      0 0 30px rgba(100, 220, 180, 0.5),
+      0 0 70px rgba(60, 180, 220, 0.3),
+      0 0 130px rgba(120, 100, 220, 0.15);
+  }
+  75% {
+    transform: scale(0.8);
+    border-radius: 60px;
+    box-shadow:
+      0 0 50px rgba(205, 245, 69, 0.5),
+      0 0 120px rgba(100, 220, 180, 0.4),
+      0 0 250px rgba(60, 180, 220, 0.25),
+      0 0 400px rgba(120, 100, 220, 0.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    border-radius: 16px;
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 50px rgba(205, 245, 69, 0.55),
+      0 0 120px rgba(205, 245, 69, 0.45),
+      0 0 250px rgba(205, 245, 69, 0.3),
+      0 0 450px rgba(78, 168, 109, 0.2),
+      0 0 650px rgba(78, 168, 109, 0.1);
+  }
+}
+
+/* Boom burst on full expansion */
+@keyframes auraBoom {
+  0% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 80px rgba(205, 245, 69, 0.9),
+      0 0 200px rgba(205, 245, 69, 0.7),
+      0 0 400px rgba(100, 220, 180, 0.5),
+      0 0 650px rgba(60, 180, 220, 0.35),
+      0 0 900px rgba(120, 100, 220, 0.2),
+      0 0 1100px rgba(78, 168, 109, 0.1);
+  }
+  100% {
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 50px rgba(205, 245, 69, 0.55),
+      0 0 120px rgba(205, 245, 69, 0.45),
+      0 0 250px rgba(205, 245, 69, 0.3),
+      0 0 450px rgba(78, 168, 109, 0.2),
+      0 0 650px rgba(78, 168, 109, 0.1);
+  }
+}
+
+/* Continuous aurora color shift on resting card */
+@keyframes auroraGlow {
+  0%, 100% {
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 50px rgba(205, 245, 69, 0.55),
+      0 0 120px rgba(205, 245, 69, 0.45),
+      0 0 250px rgba(205, 245, 69, 0.3),
+      0 0 450px rgba(78, 168, 109, 0.2),
+      0 0 650px rgba(78, 168, 109, 0.1);
+  }
+  33% {
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 50px rgba(100, 220, 180, 0.55),
+      0 0 120px rgba(60, 200, 180, 0.45),
+      0 0 250px rgba(60, 180, 220, 0.3),
+      0 0 450px rgba(60, 180, 220, 0.18),
+      0 0 650px rgba(40, 160, 200, 0.08);
+  }
+  66% {
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 50px rgba(120, 200, 255, 0.55),
+      0 0 120px rgba(120, 100, 220, 0.4),
+      0 0 250px rgba(160, 120, 255, 0.25),
+      0 0 450px rgba(100, 220, 180, 0.15),
+      0 0 650px rgba(120, 100, 220, 0.06);
+  }
+}
+
+@keyframes authContentReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 480px) {
   .auth-card {
     margin: 16px;
@@ -158,5 +361,15 @@
 
   .auth-brand-name {
     font-size: 26px;
+  }
+
+  .auth-page::before {
+    width: 350px;
+    height: 350px;
+  }
+
+  .auth-page::after {
+    width: 500px;
+    height: 500px;
   }
 }
