@@ -29,8 +29,11 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-logo">StyleGuard</h1>
-        <p className="auth-subtitle">Create your account</p>
+        <div className="auth-brand">
+          <img src="/logo.jpg" alt="StyleGuard" className="auth-brand-icon" />
+          <h1 className="auth-brand-name">Style<span className="auth-brand-accent">Guard</span></h1>
+          <p className="auth-brand-tagline">Create your account</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && <div className="auth-error">{error}</div>}

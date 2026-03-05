@@ -10,7 +10,7 @@ projects_bp = Blueprint("projects", __name__)
 @projects_bp.route("/projects", methods=["GET"])
 @jwt_required()
 def list_projects():
-    projects = Project.query.order_by(Project.created_at.desc()).all()
+    projects = Project.query.order_by(Project.created_at.asc()).all()
     return jsonify([p.to_dict() for p in projects]), 200
 
 

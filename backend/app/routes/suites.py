@@ -11,7 +11,7 @@ suites_bp = Blueprint("suites", __name__)
 @jwt_required()
 def list_suites(project_id):
     Project.query.get_or_404(project_id)
-    suites = Suite.query.filter_by(project_id=project_id).order_by(Suite.created_at.desc()).all()
+    suites = Suite.query.filter_by(project_id=project_id).order_by(Suite.created_at.asc()).all()
     result = []
     for s in suites:
         d = s.to_dict()

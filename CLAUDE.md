@@ -1,6 +1,6 @@
 # StyleGuard — Test Management Application
 
-A TestRail-like test management web application with a React frontend and Flask REST API backend.
+A TestRail-like test management web application with a React frontend and Flask REST API backend. Features a modern design system with DM Sans typography, tinted status/priority badges, smooth animations, collapsible sidebar, responsive mobile layout, and user avatar uploads.
 
 ## Quick Start
 
@@ -28,34 +28,35 @@ cd frontend && npm run build
 dashboard/
 ├── backend/            # Flask REST API (Python 3.13, port 5001)
 │   ├── app/
-│   │   ├── __init__.py         # App factory: Flask + SQLAlchemy + JWT + CORS init
+│   │   ├── __init__.py         # App factory: Flask + SQLAlchemy + JWT + CORS init + uploads dir
 │   │   ├── models.py           # 8 SQLAlchemy models (all tables)
 │   │   └── routes/
-│   │       ├── auth.py         # Register, login, current user (JWT)
+│   │       ├── auth.py         # Register, login, current user, avatar upload/serve (JWT)
 │   │       ├── projects.py     # Project CRUD + stats
 │   │       ├── suites.py       # Test suite CRUD (scoped to project)
 │   │       ├── sections.py     # Section CRUD (scoped to suite, self-referential tree)
 │   │       ├── test_cases.py   # Test case CRUD (steps stored as JSON)
 │   │       ├── test_runs.py    # Run CRUD + result management + history
 │   │       └── dashboard.py    # Aggregated stats (global + per-project)
-│   ├── config.py               # SQLite URI, JWT secret, token expiry
+│   ├── config.py               # SQLite URI, JWT secret, token expiry, upload settings
 │   ├── run.py                  # Entry point (port 5001, creates tables on start)
 │   ├── seed.py                 # Demo data: 2 projects, 3 suites, 30 cases, 3 runs
 │   ├── requirements.txt        # Flask, Flask-SQLAlchemy, Flask-CORS, Flask-JWT-Extended, Werkzeug
+│   ├── uploads/avatars/        # User avatar image storage (auto-created)
 │   └── app.db                  # SQLite database (auto-created)
 │
 ├── frontend/           # React 19 SPA (Vite, port 5173)
 │   └── src/
 │       ├── main.jsx            # Entry: BrowserRouter + AuthProvider
-│       ├── App.jsx             # Route definitions + layout (sidebar + main)
-│       ├── index.css           # Global styles (buttons, tables, forms, layout)
+│       ├── App.jsx             # Route definitions + layout (collapsible sidebar + responsive main)
+│       ├── index.css           # Global styles (DM Sans font, buttons, tables, forms, animations)
 │       ├── styles/
-│       │   └── variables.css   # CSS custom properties (colors, spacing, shadows)
+│       │   └── variables.css   # CSS custom properties (colors, shadows, radii, typography, status/priority tints)
 │       ├── context/
-│       │   └── AuthContext.jsx  # Auth state: user, token, login(), logout(), isAuthenticated
+│       │   └── AuthContext.jsx  # Auth state: user, token, login(), logout(), updateAvatar(), isAuthenticated
 │       ├── services/
 │       │   ├── api.js           # Axios instance (baseURL: localhost:5001/api, JWT interceptor)
-│       │   ├── authService.js   # login(), register(), getMe()
+│       │   ├── authService.js   # login(), register(), getMe(), uploadAvatar()
 │       │   ├── projectService.js
 │       │   ├── suiteService.js
 │       │   ├── sectionService.js
@@ -63,15 +64,15 @@ dashboard/
 │       │   ├── runService.js
 │       │   └── dashboardService.js
 │       ├── components/
-│       │   ├── Sidebar.jsx      # Fixed dark navy sidebar with project list + nav (inline SVG icons)
-│       │   ├── Header.jsx       # Breadcrumb header bar
-│       │   ├── StatusBadge.jsx  # Color-coded status pill (Passed/Failed/Blocked/Retest/Untested)
-│       │   ├── PriorityBadge.jsx # Color-coded priority label (Critical/High/Medium/Low)
+│       │   ├── Sidebar.jsx      # Collapsible dark sidebar with project list, avatar upload, mobile hamburger
+│       │   ├── Header.jsx       # Breadcrumb header bar with mobile hamburger toggle
+│       │   ├── StatusBadge.jsx  # Tinted pill badges (colored text on light bg)
+│       │   ├── PriorityBadge.jsx # Tinted pill badges (colored text on light bg)
 │       │   ├── SectionTree.jsx  # Recursive tree built from flat section list
-│       │   ├── StatsCard.jsx    # Stat card (value + label)
-│       │   ├── Modal.jsx        # Generic modal overlay
+│       │   ├── StatsCard.jsx    # Stat card with hover lift effect
+│       │   ├── Modal.jsx        # Generic modal with backdrop blur + scaleIn animation
 │       │   ├── ConfirmDialog.jsx # Delete confirmation dialog
-│       │   ├── LoadingSpinner.jsx
+│       │   ├── LoadingSpinner.jsx # Branded spinner with loading text
 │       │   └── ProtectedRoute.jsx # Redirects to /login if not authenticated
 │       └── pages/
 │           ├── LoginPage.jsx         # Username/password login form
@@ -93,7 +94,7 @@ dashboard/
 
 | Model | Table | Key Fields | Notes |
 |-------|-------|-----------|-------|
-| `User` | `users` | id, username, email, password_hash | `set_password()` / `check_password()` using werkzeug |
+| `User` | `users` | id, username, email, password_hash, avatar | `set_password()` / `check_password()` using werkzeug. `avatar` stores uploaded filename |
 | `Project` | `projects` | id, name, description, created_by (FK users) | Cascades delete to suites and runs |
 | `Suite` | `suites` | id, project_id (FK projects), name | Cascades delete to sections |
 | `Section` | `sections` | id, suite_id (FK suites), parent_id (FK sections, nullable), name, display_order | Self-referential tree. `parent_id=NULL` = root. Frontend builds tree from flat list |
@@ -112,6 +113,8 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 | POST | `/api/auth/register` | Register user `{username, email, password}` → `{id, username, token}` |
 | POST | `/api/auth/login` | Login `{username, password}` → `{id, username, token}` |
 | GET | `/api/auth/me` | Get current user info |
+| POST | `/api/auth/avatar` | Upload avatar image (multipart/form-data, JPEG/PNG, max 2MB) |
+| GET | `/api/auth/avatars/:filename` | Serve uploaded avatar image file |
 
 ### Projects (`/api`)
 | Method | Path | Description |
@@ -187,7 +190,7 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 ## Key Patterns
 
 ### Backend
-- **App factory** in `app/__init__.py` — `create_app()` initializes Flask, SQLAlchemy, JWT, CORS, registers 7 Blueprints
+- **App factory** in `app/__init__.py` — `create_app()` initializes Flask, SQLAlchemy, JWT, CORS, registers 7 Blueprints, creates uploads directory
 - **All Blueprints** registered with `url_prefix="/api"` (except auth: `/api/auth`)
 - **Auth** via `@jwt_required()` decorator on every non-auth endpoint. Token identity is `str(user.id)`
 - **Serialization** via `to_dict()` methods on each model (no Marshmallow/Pydantic)
@@ -195,21 +198,38 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 - **Cascade deletes** configured on SQLAlchemy relationships (`cascade="all, delete-orphan"`)
 - **Section tree** returned as a flat list — frontend reconstructs the tree using `parent_id`
 - **Test case steps** stored as JSON text in the `steps` column, accessed via `steps_list` property
+- **Avatar upload** accepts JPEG/PNG (max 2MB), stores files in `uploads/avatars/` with user ID prefix, served via `send_from_directory`
 
 ### Frontend
 - **Service layer**: Each entity has a service file (`services/*.js`) wrapping Axios calls
 - **API base URL**: `http://localhost:5001/api` (configured in `services/api.js`)
 - **JWT interceptor**: Axios request interceptor adds `Authorization: Bearer` from localStorage; 401 response interceptor clears token and redirects to login
-- **Auth state**: `AuthContext` provides `user`, `login()`, `logout()`, `isAuthenticated` via React Context
+- **Auth state**: `AuthContext` provides `user`, `login()`, `logout()`, `updateAvatar()`, `isAuthenticated` via React Context
+- **Collapsible sidebar**: Sidebar collapse state persisted in localStorage; `App.jsx` manages `sidebarCollapsed` and `mobileOpen` states
+- **Mobile responsive**: `useIsMobile()` hook (768px breakpoint) triggers hamburger menu, overlay backdrop, slide-in sidebar, auto-close on navigation
+- **Avatar upload**: Click avatar badge/image in sidebar footer → hidden file input → uploads via `authService.uploadAvatar()` → updates AuthContext
 - **Sidebar refresh**: `window.__refreshSidebarProjects` function allows any page to trigger sidebar project list refresh after creating/deleting projects
 - **Icons**: Inline SVG icons (no icon library). Sidebar uses SVG with `currentColor` stroke for theme-aware rendering
-- **CSS**: Design tokens in `styles/variables.css`, component-scoped CSS files (e.g., `Sidebar.css`), global styles in `index.css`
 - **Charts**: `react-chartjs-2` Doughnut charts for test result distribution
+
+### Design System
+- **Typography**: DM Sans (Google Fonts) as primary font via `--font-sans` variable
+- **CSS architecture**: Design tokens in `styles/variables.css`, component-scoped CSS files, global styles in `index.css`
+- **Shadows**: Multi-layer elevation system (`--shadow-xs` through `--shadow-xl`)
+- **Border radii**: Rounded scale (`--radius-sm: 6px` through `--radius-full: 9999px`)
+- **Status badges**: Tinted pill style — colored text on light tinted background (e.g., green text on `#e8f5e9`)
+- **Priority badges**: Tinted pill style matching status badge pattern
+- **Animations**: `fadeIn`, `slideUp`, `shimmer`, `scaleIn` keyframes; hover lift effects on cards; `scale(0.97)` button press
+- **Modal**: Backdrop blur (`backdrop-filter: blur(4px)`) with `scaleIn` entrance animation
+- **Auth pages**: Dark forest green gradient background, lime accent button color (`#CDF545`)
 
 ### Status & Priority Values
 - **Test statuses**: `Passed`, `Failed`, `Blocked`, `Retest`, `Untested`
 - **Status colors**: Passed=#4CAF50, Failed=#F44336, Blocked=#FF9800, Retest=#2196F3, Untested=#9E9E9E
+- **Status tint backgrounds**: Passed=#e8f5e9, Failed=#ffebee, Blocked=#fff3e0, Retest=#e3f2fd, Untested=#f5f5f5
 - **Priorities**: `Critical`, `High`, `Medium`, `Low`
+- **Priority colors**: Critical=#d32f2f, High=#f57c00, Medium=#1976d2, Low=#757575
+- **Priority tint backgrounds**: Critical=#ffebee, High=#fff3e0, Medium=#e3f2fd, Low=#f5f5f5
 - **Case types**: `Functional`, `Regression`, `Smoke`, `Performance`, `Security`, `Usability`, `Other`
 
 ## Common Development Tasks
@@ -228,6 +248,7 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 2. Create route file in `backend/app/routes/`
 3. Register blueprint in `backend/app/__init__.py`
 4. Restart backend (tables auto-created via `db.create_all()` in `run.py`)
+5. Note: `db.create_all()` does NOT add columns to existing tables — use `ALTER TABLE` for migrations
 
 **Reset the database:**
 ```bash
@@ -261,3 +282,9 @@ python seed.py      # Optional: populate demo data
 - Backend API: **5001** (macOS uses 5000 for AirTunes)
 - Frontend dev server: **5173** (Vite default)
 - CORS configured to allow `http://localhost:5173` and `http://127.0.0.1:5173`
+
+## Upload Configuration
+- **Avatar storage**: `backend/uploads/avatars/` (auto-created on app start)
+- **Max file size**: 2MB (`MAX_CONTENT_LENGTH` in `config.py`)
+- **Allowed formats**: JPEG, PNG
+- **Filename pattern**: `{user_id}_{secure_filename}` to avoid collisions

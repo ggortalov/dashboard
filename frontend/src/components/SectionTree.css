@@ -1,12 +1,12 @@
 .section-tree {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .tree-node-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 8px 14px;
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background var(--transition);
@@ -25,7 +25,7 @@
 
 .tree-toggle {
   font-size: 10px;
-  width: 14px;
+  width: 16px;
   text-align: center;
   color: var(--text-muted);
   flex-shrink: 0;
@@ -47,9 +47,10 @@
   font-size: 11px;
   color: var(--text-muted);
   background: var(--border-light);
-  padding: 1px 6px;
-  border-radius: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
+  font-weight: 500;
 }
 
 .tree-node-actions {
@@ -68,17 +69,20 @@
   color: var(--text-muted);
   cursor: pointer;
   font-size: 14px;
-  padding: 0 3px;
+  padding: 2px 4px;
   line-height: 1;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
 }
 
 .tree-node-actions button:hover {
   color: var(--primary);
+  background: var(--primary-light);
 }
 
 .tree-empty {
-  padding: 20px;
+  padding: 24px;
   text-align: center;
   color: var(--text-muted);
-  font-style: italic;
+  font-size: 14px;
 }

@@ -1,27 +1,31 @@
 .case-detail-card {
   max-width: 800px;
+  animation: slideUp 0.3s ease;
 }
 
 .case-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .case-detail-header h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .case-meta-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  padding: 16px;
-  background: var(--bg-main);
+  padding: 18px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .case-meta-item {
@@ -31,9 +35,8 @@
 }
 
 .meta-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
@@ -44,12 +47,13 @@
 }
 
 .case-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .case-section h3 {
-  font-size: 14px;
-  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 10px;
   color: var(--text-primary);
 }
 
@@ -57,13 +61,13 @@
   margin: 0;
   font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
 .steps-table .step-number {
-  width: 40px;
+  width: 44px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
 }

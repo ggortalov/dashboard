@@ -1,21 +1,22 @@
 .run-summary {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  animation: slideUp 0.3s ease;
 }
 
 .run-summary-bar {
   display: flex;
-  height: 28px;
-  border-radius: var(--radius-sm);
+  height: 32px;
+  border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .summary-bar-segment {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  transition: width var(--transition);
+  min-width: 32px;
+  transition: width var(--transition-slow);
 }
 
 .segment-label {
@@ -26,7 +27,7 @@
 
 .run-summary-stats {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
   font-size: 13px;
   color: var(--text-secondary);
@@ -35,26 +36,26 @@
 .run-stat-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .run-stat-color {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
 .run-detail-grid {
   display: grid;
   grid-template-columns: 240px 1fr;
-  gap: 20px;
+  gap: 24px;
 }
 
 .run-chart-card h3,
 .run-results-card h3 {
-  margin: 0 0 12px;
-  font-size: 15px;
+  margin: 0 0 16px;
+  font-size: 16px;
 }
 
 .results-toolbar {
@@ -63,24 +64,26 @@
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .status-filters {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .filter-btn {
-  background: var(--bg-main);
+  background: #fff;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  font-size: 11px;
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition);
+  font-family: inherit;
 }
 
 .filter-btn:hover {

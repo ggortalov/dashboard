@@ -1,16 +1,19 @@
 .case-form-card {
   max-width: 800px;
+  animation: slideUp 0.3s ease;
 }
 
 .case-form-title {
-  margin: 0 0 20px;
-  font-size: 18px;
+  margin: 0 0 24px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .case-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .form-row {
@@ -29,25 +32,25 @@
 .steps-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .step-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
 }
 
 .step-num {
-  width: 24px;
-  height: 34px;
+  width: 28px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   background: var(--border-light);
   border-radius: var(--radius-sm);
@@ -56,7 +59,7 @@
 .step-fields {
   flex: 1;
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .step-fields input {
@@ -64,6 +67,7 @@
 }
 
 .btn-sm {
-  padding: 4px 12px;
+  padding: 6px 14px;
   font-size: 12px;
+  height: 34px;
 }

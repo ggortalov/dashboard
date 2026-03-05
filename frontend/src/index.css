@@ -1,3 +1,6 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,16 +8,16 @@
 }
 
 body {
-  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--text-primary);
   background: var(--bg-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Layout */
+/* ============ Layout ============ */
 .app-layout {
   display: flex;
   min-height: 100vh;
@@ -35,6 +38,14 @@ body {
   margin-left: 0;
 }
 
+.page-content {
+  padding: 28px;
+}
+
+.app-main--mobile .page-content {
+  padding-top: 56px;
+}
+
 /* Mobile hamburger button */
 .mobile-hamburger {
   position: fixed;
@@ -43,13 +54,18 @@ body {
   z-index: 99;
   background: var(--sidebar-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
+  transition: transform var(--transition);
+}
+
+.mobile-hamburger:active {
+  transform: scale(0.93);
 }
 
 .mobile-hamburger svg {
@@ -62,23 +78,18 @@ body {
 .sidebar-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
   z-index: 99;
+  animation: fadeIn 0.2s ease;
 }
 
-.page-content {
-  padding: 24px;
-}
-
-.app-main--mobile .page-content {
-  padding-top: 56px;
-}
-
+/* ============ Page Chrome ============ */
 .page-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   gap: 16px;
 }
 
@@ -93,6 +104,7 @@ body {
   font-size: 26px;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.3px;
 }
 
 .page-description {
@@ -101,18 +113,20 @@ body {
   color: var(--text-secondary);
 }
 
-/* Cards */
+/* ============ Cards ============ */
 .card {
   background: var(--bg-white);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  padding: 20px;
+  border-radius: var(--radius-lg);
+  padding: 24px;
   box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-slow), transform var(--transition);
 }
 
 .card h3 {
-  margin: 0 0 12px;
-  font-size: 15px;
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -122,11 +136,11 @@ body {
   margin-bottom: 12px;
 }
 
-/* Forms */
+/* ============ Forms ============ */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .form-group label {
@@ -138,26 +152,33 @@ body {
 .form-group input,
 .form-group textarea,
 .form-group select {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-family: inherit;
   color: var(--text-primary);
   background: #fff;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  height: 42px;
+}
+
+.form-group textarea {
+  height: auto;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-group select {
+  cursor: pointer;
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
+  border-color: var(--sidebar-bg);
+  box-shadow: 0 0 0 3px rgba(26, 58, 42, 0.12);
 }
 
 .form-actions {
@@ -173,12 +194,13 @@ body {
   gap: 16px;
 }
 
-/* Buttons */
+/* ============ Buttons ============ */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 9px 18px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-size: 13px;
@@ -188,20 +210,27 @@ body {
   transition: all var(--transition);
   text-decoration: none;
   white-space: nowrap;
+  height: 38px;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: var(--sidebar-bg);
   color: #fff;
+  box-shadow: 0 1px 2px rgba(26, 58, 42, 0.2);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: var(--sidebar-hover);
+  box-shadow: 0 2px 6px rgba(26, 58, 42, 0.3);
 }
 
 .btn-brand {
@@ -209,33 +238,40 @@ body {
   color: #fff;
   font-weight: 700;
   font-size: 13px;
-  padding: 8px 16px;
+  padding: 9px 18px;
   letter-spacing: -0.3px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 2px rgba(26, 58, 42, 0.2);
 }
 
 .btn-brand:hover:not(:disabled) {
   background: #133125;
+  box-shadow: 0 2px 6px rgba(26, 58, 42, 0.3);
 }
 
 .btn-secondary {
   background: #fff;
-  border-color: var(--border);
-  color: var(--text-primary);
+  border-color: var(--sidebar-bg);
+  color: var(--sidebar-bg);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-main);
+  background: var(--sidebar-bg);
+  color: #fff;
+  border-color: var(--sidebar-bg);
 }
 
 .btn-danger {
-  background: var(--status-failed);
-  color: #fff;
+  background: #fff;
+  color: var(--status-failed);
+  border-color: var(--status-failed);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #d32f2f;
+  background: var(--status-failed);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.25);
 }
 
 .btn-icon {
@@ -244,9 +280,10 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   font-size: 16px;
-  padding: 2px 6px;
+  padding: 6px 8px;
   border-radius: var(--radius-sm);
   transition: all var(--transition);
+  height: auto;
 }
 
 .btn-icon:hover {
@@ -256,36 +293,43 @@ body {
 
 .btn-icon.danger:hover {
   color: var(--status-failed);
-  background: #fdecea;
+  background: var(--status-failed-bg);
 }
 
-/* Tables */
+/* ============ Tables ============ */
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .data-table th {
   text-align: left;
-  padding: 10px 12px;
+  padding: 12px 16px;
   font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 12px;
   color: var(--text-muted);
-  border-bottom: 2px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .data-table td {
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-light);
   vertical-align: middle;
 }
 
+.data-table tbody tr {
+  transition: background var(--transition);
+}
+
 .data-table tbody tr:hover {
-  background: #fafbfc;
+  background: var(--bg-subtle);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .clickable-row {
@@ -320,15 +364,15 @@ body {
   color: var(--text-primary);
 }
 
-/* Empty state */
+/* ============ Empty States ============ */
 .empty-message {
   text-align: center;
-  padding: 40px 20px;
+  padding: 48px 24px;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 15px;
 }
 
-/* Loading screen */
+/* ============ Loading ============ */
 .loading-screen {
   display: flex;
   align-items: center;
@@ -338,12 +382,32 @@ body {
   font-size: 16px;
 }
 
-/* Spinner animation */
+/* ============ Animations ============ */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* Scrollbar */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ============ Scrollbar ============ */
 ::-webkit-scrollbar {
   width: 6px;
 }
