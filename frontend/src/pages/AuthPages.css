@@ -81,7 +81,7 @@
 .auth-form .btn-primary {
   background: var(--sidebar-bg);
   border: none;
-  color: #CDF545;
+  color: #fff;
   font-weight: 600;
   height: 44px;
   border-radius: var(--radius-md);

@@ -43,7 +43,7 @@ export default function DashboardPage() {
       <div className="page-content">
         <div className="page-toolbar">
           <h2 className="page-heading">Dashboard</h2>
-          <button className="btn btn-brand" onClick={() => setShowCreate(true)}>+ New Project</button>
+          <button className="btn btn-brand" onClick={() => setShowCreate(true)}>+ Add New Suite</button>
         </div>
 
         <div className="dashboard-section">

@@ -82,7 +82,10 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
   };
 
   return (
-    <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${isMobile ? 'sidebar--mobile' : ''} ${isMobile && mobileOpen ? 'sidebar--mobile-open' : ''}`}>
+    <aside
+      className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${isMobile ? 'sidebar--mobile' : ''} ${isMobile && mobileOpen ? 'sidebar--mobile-open' : ''}`}
+      onClickCapture={collapsed && !isMobile ? (e) => { e.stopPropagation(); e.preventDefault(); onToggleCollapse(); } : undefined}
+    >
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <img src="/logo.jpg" alt="StyleGuard" className="sidebar-logo-img" />
@@ -92,22 +95,21 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
             </div>
           )}
         </div>
-        {isMobile ? (
-          <button className="sidebar-collapse-btn" onClick={onToggleCollapse} title="Close menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        ) : (
-          <button className="sidebar-collapse-btn" onClick={onToggleCollapse} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {collapsed
-                ? <polyline points="9 18 15 12 9 6" />
-                : <polyline points="15 18 9 12 15 6" />
-              }
-            </svg>
-          </button>
+        {!collapsed && (
+          isMobile ? (
+            <button className="sidebar-collapse-btn" onClick={onToggleCollapse} title="Close menu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          ) : (
+            <button className="sidebar-collapse-btn" onClick={onToggleCollapse} title="Collapse sidebar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )
         )}
       </div>
 

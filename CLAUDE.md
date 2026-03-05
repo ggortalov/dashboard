@@ -46,6 +46,8 @@ dashboard/
 │   └── app.db                  # SQLite database (auto-created)
 │
 ├── frontend/           # React 19 SPA (Vite, port 5173)
+│   ├── public/
+│   │   └── logo.jpg            # Brand logo (lion with sunglasses), color-shifted via CSS filters
 │   └── src/
 │       ├── main.jsx            # Entry: BrowserRouter + AuthProvider
 │       ├── App.jsx             # Route definitions + layout (collapsible sidebar + responsive main)
@@ -64,7 +66,7 @@ dashboard/
 │       │   ├── runService.js
 │       │   └── dashboardService.js
 │       ├── components/
-│       │   ├── Sidebar.jsx      # Collapsible dark sidebar with project list, avatar upload, mobile hamburger
+│       │   ├── Sidebar.jsx      # Collapsible sidebar with brand logo, project→suite tree nav, avatar upload, mobile hamburger
 │       │   ├── Header.jsx       # Breadcrumb header bar with mobile hamburger toggle
 │       │   ├── StatusBadge.jsx  # Tinted pill badges (colored text on light bg)
 │       │   ├── PriorityBadge.jsx # Tinted pill badges (colored text on light bg)
@@ -75,8 +77,8 @@ dashboard/
 │       │   ├── LoadingSpinner.jsx # Branded spinner with loading text
 │       │   └── ProtectedRoute.jsx # Redirects to /login if not authenticated
 │       └── pages/
-│           ├── LoginPage.jsx         # Username/password login form
-│           ├── RegisterPage.jsx      # Registration form
+│           ├── LoginPage.jsx         # Login form with brand logo lockup
+│           ├── RegisterPage.jsx      # Registration form with brand logo lockup
 │           ├── DashboardPage.jsx     # Project cards, global stats, doughnut chart, recent runs
 │           ├── ProjectDetailPage.jsx # Tabs: Suites / Test Runs / Overview with charts
 │           ├── TestSuitePage.jsx     # Split: section tree (left) + test case table (right)
@@ -206,22 +208,26 @@ All endpoints return JSON. All except `/api/auth/register` and `/api/auth/login`
 - **JWT interceptor**: Axios request interceptor adds `Authorization: Bearer` from localStorage; 401 response interceptor clears token and redirects to login
 - **Auth state**: `AuthContext` provides `user`, `login()`, `logout()`, `updateAvatar()`, `isAuthenticated` via React Context
 - **Collapsible sidebar**: Sidebar collapse state persisted in localStorage; `App.jsx` manages `sidebarCollapsed` and `mobileOpen` states
+- **Sidebar suite filtering**: Projects expand to show their suites inline; auto-expands current project based on URL path; suites fetched via `suiteService.getByProject()`
 - **Mobile responsive**: `useIsMobile()` hook (768px breakpoint) triggers hamburger menu, overlay backdrop, slide-in sidebar, auto-close on navigation
 - **Avatar upload**: Click avatar badge/image in sidebar footer → hidden file input → uploads via `authService.uploadAvatar()` → updates AuthContext
 - **Sidebar refresh**: `window.__refreshSidebarProjects` function allows any page to trigger sidebar project list refresh after creating/deleting projects
 - **Icons**: Inline SVG icons (no icon library). Sidebar uses SVG with `currentColor` stroke for theme-aware rendering
+- **Sort order**: Projects and suites are sorted by `created_at` ascending (oldest first)
 - **Charts**: `react-chartjs-2` Doughnut charts for test result distribution
 
 ### Design System
-- **Typography**: DM Sans (Google Fonts) as primary font via `--font-sans` variable
+- **Brand logo**: Lion icon (`public/logo.jpg`) displayed in sidebar header and auth pages; CSS `hue-rotate(-65deg) saturate(0.5)` shifts original blue to forest green matching the app palette; multi-layer box-shadow for depth
+- **Color scheme**: Fully green-themed — `btn-primary`, `btn-secondary`, `btn-danger`, input focus rings, and active tabs all use `--sidebar-bg` (#1a3a2a) green instead of blue. Buttons use outlined style (white bg + colored border) that fills on hover
+- **Typography**: DM Sans (Google Fonts) as primary font via `--font-sans` variable; sidebar brand uses "Style" (semibold) + "Guard" (light weight) split for Apple-style wordmark
 - **CSS architecture**: Design tokens in `styles/variables.css`, component-scoped CSS files, global styles in `index.css`
 - **Shadows**: Multi-layer elevation system (`--shadow-xs` through `--shadow-xl`)
 - **Border radii**: Rounded scale (`--radius-sm: 6px` through `--radius-full: 9999px`)
 - **Status badges**: Tinted pill style — colored text on light tinted background (e.g., green text on `#e8f5e9`)
 - **Priority badges**: Tinted pill style matching status badge pattern
-- **Animations**: `fadeIn`, `slideUp`, `shimmer`, `scaleIn` keyframes; hover lift effects on cards; `scale(0.97)` button press
+- **Animations**: `fadeIn`, `slideUp`, `shimmer`, `scaleIn` keyframes; hover lift effects on cards; `scale(0.97)` button press; Apple-style spring easing `cubic-bezier(0.16, 1, 0.3, 1)` on auth card
 - **Modal**: Backdrop blur (`backdrop-filter: blur(4px)`) with `scaleIn` entrance animation
-- **Auth pages**: Dark forest green gradient background, lime accent button color (`#CDF545`)
+- **Auth pages**: Dark forest green gradient background, centered brand lockup (96px icon + wordmark + tagline), lime accent button color (`#CDF545`)
 
 ### Status & Priority Values
 - **Test statuses**: `Passed`, `Failed`, `Blocked`, `Retest`, `Untested`
