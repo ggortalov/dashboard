@@ -22,6 +22,10 @@ def list_projects():
         suite_ids = [s.id for s in suites]
         sections = Section.query.filter(Section.suite_id.in_(suite_ids)).order_by(Section.display_order).all() if suite_ids else []
         d["categories"] = [{"id": sec.id, "name": sec.name, "parent_id": sec.parent_id} for sec in sections]
+        # Include test cases (minimal data for sidebar)
+        section_ids = [sec.id for sec in sections]
+        cases = TestCase.query.filter(TestCase.section_id.in_(section_ids)).order_by(TestCase.created_at).all() if section_ids else []
+        d["cases"] = [{"id": c.id, "title": c.title, "section_id": c.section_id} for c in cases]
         result.append(d)
     return jsonify(result), 200
 

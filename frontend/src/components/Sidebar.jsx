@@ -2,7 +2,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import projectService from '../services/projectService';
-import authService from '../services/authService';
+import UserSettingsModal from './UserSettingsModal';
 import './Sidebar.css';
 
 function getIdsFromPath(pathname) {
@@ -15,31 +15,23 @@ function getIdsFromPath(pathname) {
 }
 
 export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMobile }) {
-  const { user, logout, updateAvatar } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { projectId: currentProjectId } = getIdsFromPath(location.pathname);
+  const { projectId: pathProjectId } = getIdsFromPath(location.pathname);
+  const newCaseId = new URLSearchParams(location.search).get('newCaseId');
   const [projects, setProjects] = useState([]);
   const [suitesOpen, setSuitesOpen] = useState(true);
-  const fileInputRef = useRef(null);
+  const scrolledToCaseRef = useRef(null);
+  const lastProjectIdRef = useRef(null);
+
+  // Remember the last project so the tree stays open on /cases/:id routes
+  if (pathProjectId) {
+    lastProjectIdRef.current = pathProjectId;
+  }
+  const currentProjectId = pathProjectId || lastProjectIdRef.current;
 
   const API_BASE = 'http://localhost:5001';
-
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const data = await authService.uploadAvatar(file);
-      updateAvatar(data.avatar);
-    } catch {
-      // silently fail
-    }
-    e.target.value = '';
-  };
 
   const loadProjects = () => {
     projectService.getAll()
@@ -47,7 +39,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
       .catch(() => {});
   };
 
-  useEffect(() => { loadProjects(); }, []);
+  useEffect(() => { loadProjects(); }, [currentProjectId]);
 
   useEffect(() => {
     if (currentProjectId) setSuitesOpen(true);
@@ -58,6 +50,30 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
     window.__refreshSidebarProjects = loadProjects;
     return () => { delete window.__refreshSidebarProjects; };
   }, []);
+
+  // Scroll to newly created case in sidebar (delayed after main content)
+  useEffect(() => {
+    if (newCaseId && projects.length > 0 && scrolledToCaseRef.current !== newCaseId) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`sidebar-case-${newCaseId}`);
+        if (el) {
+          scrolledToCaseRef.current = newCaseId;
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('sidebar-case-item--highlight');
+          setTimeout(() => el.classList.remove('sidebar-case-item--highlight'), 2500);
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [newCaseId, projects]);
+
+  const [collapsedCats, setCollapsedCats] = useState({});
+
+  const toggleCat = (catId) => {
+    setCollapsedCats(prev => ({ ...prev, [catId]: !prev[catId] }));
+  };
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [logoutConfirm, setLogoutConfirm] = useState(false);
   const logoutTimerRef = useRef(null);
@@ -159,41 +175,99 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
                           childMap[c.parent_id].push(c);
                         }
                       });
+                      // Build cases-by-section map
+                      const casesForSection = {};
+                      (p.cases || []).forEach(tc => {
+                        if (!casesForSection[tc.section_id]) casesForSection[tc.section_id] = [];
+                        casesForSection[tc.section_id].push(tc);
+                      });
                       return (
                         <div className="sidebar-category-list">
                           {roots.map((cat) => {
                             const catPath = `${path}?categoryId=${cat.id}`;
                             const isCatActive = location.search === `?categoryId=${cat.id}`;
                             const children = childMap[cat.id] || [];
+                            const catCases = casesForSection[cat.id] || [];
+                            const hasContent = children.length > 0 || catCases.length > 0;
+                            const isCatCollapsed = !!collapsedCats[cat.id];
                             return (
                               <div key={cat.id}>
-                                <a
-                                  className={`sidebar-category-item ${isCatActive ? 'active' : ''}`}
-                                  href={catPath}
-                                  onClick={(e) => { e.preventDefault(); navigate(catPath); }}
-                                >
-                                  <svg className="sidebar-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-                                  </svg>
-                                  {cat.name}
-                                </a>
-                                {children.map((sub) => {
-                                  const subPath = `${path}?categoryId=${sub.id}`;
-                                  const isSubActive = location.search === `?categoryId=${sub.id}`;
-                                  return (
-                                    <a
-                                      key={sub.id}
-                                      className={`sidebar-category-item sidebar-subcategory-item ${isSubActive ? 'active' : ''}`}
-                                      href={subPath}
-                                      onClick={(e) => { e.preventDefault(); navigate(subPath); }}
-                                    >
-                                      <svg className="sidebar-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <div className={`sidebar-category-item ${isCatActive ? 'active' : ''}`}>
+                                  {hasContent && (
+                                    <button className="sidebar-cat-toggle" onClick={() => toggleCat(cat.id)}>
+                                      <svg className={`sidebar-cat-chevron ${isCatCollapsed ? '' : 'open'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="9 18 15 12 9 6" />
                                       </svg>
-                                      {sub.name}
-                                    </a>
-                                  );
-                                })}
+                                    </button>
+                                  )}
+                                  <a
+                                    className="sidebar-category-link"
+                                    href={catPath}
+                                    onClick={(e) => { e.preventDefault(); navigate(catPath); }}
+                                  >
+                                    <svg className="sidebar-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+                                    </svg>
+                                    {cat.name}
+                                  </a>
+                                </div>
+                                {!isCatCollapsed && (
+                                  <>
+                                    {catCases.map((tc) => (
+                                      <a
+                                        key={`tc-${tc.id}`}
+                                        id={`sidebar-case-${tc.id}`}
+                                        className="sidebar-case-item"
+                                        href={`/cases/${tc.id}`}
+                                        onClick={(e) => { e.preventDefault(); navigate(`/cases/${tc.id}`); }}
+                                      >
+                                        <span className="sidebar-case-id">C{String(tc.id).padStart(7, '0')}</span>
+                                        <span className="sidebar-case-title">{tc.title}</span>
+                                      </a>
+                                    ))}
+                                    {children.map((sub) => {
+                                      const subPath = `${path}?categoryId=${sub.id}`;
+                                      const isSubActive = location.search === `?categoryId=${sub.id}`;
+                                      const subCases = casesForSection[sub.id] || [];
+                                      const isSubCollapsed = !!collapsedCats[`sub-${sub.id}`];
+                                      return (
+                                        <div key={sub.id}>
+                                          <div className={`sidebar-category-item sidebar-subcategory-item ${isSubActive ? 'active' : ''}`}>
+                                            {subCases.length > 0 && (
+                                              <button className="sidebar-cat-toggle" onClick={() => toggleCat(`sub-${sub.id}`)}>
+                                                <svg className={`sidebar-cat-chevron ${isSubCollapsed ? '' : 'open'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                  <polyline points="9 18 15 12 9 6" />
+                                                </svg>
+                                              </button>
+                                            )}
+                                            <a
+                                              className="sidebar-category-link"
+                                              href={subPath}
+                                              onClick={(e) => { e.preventDefault(); navigate(subPath); }}
+                                            >
+                                              <svg className="sidebar-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="9 18 15 12 9 6" />
+                                              </svg>
+                                              {sub.name}
+                                            </a>
+                                          </div>
+                                          {!isSubCollapsed && subCases.map((tc) => (
+                                            <a
+                                              key={`tc-${tc.id}`}
+                                              id={`sidebar-case-${tc.id}`}
+                                              className="sidebar-case-item sidebar-case-item--nested"
+                                              href={`/cases/${tc.id}`}
+                                              onClick={(e) => { e.preventDefault(); navigate(`/cases/${tc.id}`); }}
+                                            >
+                                              <span className="sidebar-case-id">C{String(tc.id).padStart(7, '0')}</span>
+                                              <span className="sidebar-case-title">{tc.title}</span>
+                                            </a>
+                                          ))}
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                )}
                               </div>
                             );
                           })}
@@ -212,28 +286,27 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
       </nav>
 
       <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/jpeg,image/png"
-            style={{ display: 'none' }}
-          />
+        <div className="sidebar-user sidebar-user--clickable" onClick={(e) => { e.stopPropagation(); setSettingsOpen(true); }} title="User Settings">
           {user?.avatar ? (
             <img
               src={`${API_BASE}${user.avatar}`}
               alt="Avatar"
               className="sidebar-user-avatar"
-              onClick={handleAvatarClick}
-              title="Click to change avatar"
             />
           ) : (
-            <span className="sidebar-user-badge" onClick={handleAvatarClick} title="Click to set avatar">
+            <span className="sidebar-user-badge">
               {user?.username?.slice(0, 2).toUpperCase() || 'SG'}
             </span>
           )}
-          <span className="sidebar-label sidebar-username">{user?.username}</span>
+          {!collapsed && (
+            <span className="sidebar-label sidebar-username">{user?.username}</span>
+          )}
+          {!collapsed && (
+            <svg className="sidebar-user-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          )}
         </div>
         {collapsed ? (
           <button className={`sidebar-logout-icon ${logoutConfirm ? 'sidebar-logout--confirm' : ''}`} onClick={(e) => { e.stopPropagation(); handleLogoutClick(); }} title={logoutConfirm ? 'Click again to confirm' : 'Logout'} aria-label="Logout">
@@ -254,6 +327,8 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, isMob
           </button>
         )}
       </div>
+
+      <UserSettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </aside>
   );
 }

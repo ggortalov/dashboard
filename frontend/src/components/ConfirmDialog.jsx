@@ -4,21 +4,39 @@ import './ConfirmDialog.css';
 export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, requireSafeguard = false }) {
   const [confirmText, setConfirmText] = useState('');
   const inputRef = useRef(null);
+  const cancelRef = useRef(null);
+  const openedAtRef = useRef(0);
 
-  // Reset input when dialog opens; auto-focus when opens
+  // Track when the dialog opened; reset state
   useEffect(() => {
     if (isOpen) {
+      openedAtRef.current = Date.now();
       setConfirmText('');
-      if (requireSafeguard) {
-        setTimeout(() => inputRef.current?.focus(), 200);
-      }
+      // Focus cancel button (or safeguard input) after a brief delay
+      const timer = setTimeout(() => {
+        if (requireSafeguard) {
+          inputRef.current?.focus();
+        } else {
+          cancelRef.current?.focus();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isOpen, requireSafeguard]);
 
-  const isConfirmed = requireSafeguard ? confirmText === 'DELETE' : true;
+  // Guard: block confirm if dialog opened less than 400ms ago
+  const canConfirm = () => {
+    if (requireSafeguard && confirmText !== 'DELETE') return false;
+    return Date.now() - openedAtRef.current > 400;
+  };
+
+  const handleConfirm = () => {
+    if (!canConfirm()) return;
+    onConfirm();
+  };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && isConfirmed) {
+    if (e.key === 'Enter' && canConfirm()) {
       onConfirm();
     }
   };
@@ -69,8 +87,8 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
 
         {/* Actions */}
         <div className="confirm-actions">
-          <button className="confirm-btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="confirm-btn-delete" onClick={onConfirm} disabled={!isConfirmed}>
+          <button ref={cancelRef} className="confirm-btn-cancel" onClick={onClose}>Cancel</button>
+          <button className="confirm-btn-delete" onClick={handleConfirm}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 6h18" />
               <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />

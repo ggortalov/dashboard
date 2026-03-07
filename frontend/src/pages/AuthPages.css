@@ -139,7 +139,7 @@
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.65);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin: 6px 0 0;
@@ -149,7 +149,7 @@
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.65);
   margin: 0;
   letter-spacing: 0;
 }
@@ -168,7 +168,7 @@
 .auth-welcome-sub {
   font-size: 14px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.65);
   margin: 6px 0 0;
   text-align: center;
 }
@@ -205,6 +205,28 @@
   color: transparent;
 }
 
+/* Override browser autofill background (Chrome/Safari force a light bg) */
+.floating-field input:-webkit-autofill,
+.floating-field input:-webkit-autofill:hover,
+.floating-field input:-webkit-autofill:focus,
+.floating-field input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 50px rgba(26, 58, 42, 0.97) inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Float label up when autofilled */
+.floating-field input:-webkit-autofill + label {
+  top: 7px;
+  transform: translateY(0);
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(205, 245, 69, 0.7);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .floating-field input:focus {
   border-color: rgba(205, 245, 69, 0.5);
   background: rgba(255, 255, 255, 0.12);
@@ -219,7 +241,7 @@
   font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.55);
   pointer-events: none;
   transition: top 0.2s ease, transform 0.2s ease, font-size 0.2s ease, color 0.2s ease;
 }
@@ -248,7 +270,7 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.75);
   user-select: none;
   transition: color 0.15s ease;
 }
@@ -302,21 +324,57 @@
 
 /* Error */
 .auth-error {
-  background: rgba(244, 67, 54, 0.15);
-  color: #ff8a80;
-  border: 1px solid rgba(244, 67, 54, 0.25);
-  padding: 12px 14px;
+  background: rgba(244, 67, 54, 0.2);
+  color: #ffcdd2;
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  padding: 12px 16px;
   border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  animation: authErrorIn 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.auth-error-list {
+  align-items: flex-start;
+}
+
+.auth-pw-requirements {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.auth-pw-requirements li {
   font-size: 13px;
   font-weight: 500;
-  animation: slideUp 0.2s ease;
+}
+
+@keyframes authErrorIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Footer link */
 .auth-switch {
   text-align: center;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.6);
   margin: 28px 0 0;
 }
 
@@ -341,7 +399,7 @@
   text-align: center;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   margin: 0;
   letter-spacing: 0.03em;
   z-index: 1;

@@ -1,7 +1,7 @@
 /* ============ Sidebar Shell ============ */
 .sidebar {
   width: var(--sidebar-width);
-  min-height: 100vh;
+  height: 100vh;
   background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
@@ -11,8 +11,7 @@
   z-index: 100;
   font-family: var(--font-sans);
   transition: width 0.25s ease;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   will-change: transform;
   contain: layout style;
 }
@@ -167,8 +166,10 @@
 /* ============ Navigation ============ */
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   padding: 16px 12px 16px 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar--collapsed .sidebar-nav {
@@ -420,6 +421,47 @@
   font-weight: 400;
 }
 
+.sidebar-cat-toggle {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity var(--transition);
+}
+
+.sidebar-cat-toggle:hover {
+  opacity: 1;
+}
+
+.sidebar-cat-chevron {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-cat-chevron.open {
+  transform: rotate(90deg);
+}
+
+.sidebar-category-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
 .sidebar-category-icon {
   width: 13px;
   height: 13px;
@@ -430,6 +472,78 @@
 .sidebar-category-item.active .sidebar-category-icon,
 .sidebar-category-item:hover .sidebar-category-icon {
   opacity: 1;
+}
+
+/* ============ Test Case Items ============ */
+.sidebar-case-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 24px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  line-height: 1.4;
+}
+
+.sidebar-case-item--nested {
+  padding-left: 38px;
+}
+
+.sidebar-case-item:hover {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-case-id {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.5;
+  flex-shrink: 0;
+  font-family: monospace;
+}
+
+.sidebar-case-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-case-item--highlight {
+  animation: sidebarSlam 0.5s cubic-bezier(0.22, 0.68, 0.36, 1.2) forwards,
+             sidebarFade 1.5s ease 0.5s forwards;
+}
+
+@keyframes sidebarSlam {
+  0% {
+    transform: scale(1.08) translateX(-6px);
+    background: rgba(76, 175, 80, 0.5);
+    color: #fff;
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1) translateX(2px);
+    opacity: 1;
+  }
+  60% {
+    transform: scale(1.02) translateX(-1px);
+    background: rgba(76, 175, 80, 0.4);
+  }
+  100% {
+    transform: scale(1) translateX(0);
+    background: rgba(76, 175, 80, 0.3);
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+@keyframes sidebarFade {
+  0% { background: rgba(76, 175, 80, 0.3); color: #fff; }
+  100% { background: transparent; color: rgba(255, 255, 255, 0.55); }
 }
 
 .sidebar-suite-empty {
@@ -449,6 +563,7 @@
 .sidebar-footer {
   padding: 16px 16px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
 }
 
 .sidebar--collapsed .sidebar-footer {
@@ -520,6 +635,38 @@
   white-space: nowrap;
 }
 
+/* ============ Clickable User Row ============ */
+.sidebar-user--clickable {
+  cursor: pointer;
+  padding: 8px 10px;
+  margin: -8px -10px 12px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition);
+}
+
+.sidebar-user--clickable:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar--collapsed .sidebar-user--clickable {
+  margin: 0 0 8px;
+  padding: 6px;
+  border-radius: var(--radius-md);
+}
+
+.sidebar-user-gear {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.4;
+  margin-left: auto;
+  transition: opacity var(--transition);
+}
+
+.sidebar-user--clickable:hover .sidebar-user-gear {
+  opacity: 0.8;
+}
+
 .sidebar-logout {
   width: 100%;
   padding: 9px 14px;
@@ -571,7 +718,6 @@
   cursor: pointer;
   transition: background var(--transition), color var(--transition), border-color var(--transition);
   padding: 0;
-  margin-top: 8px;
 }
 
 .sidebar-logout-icon svg {

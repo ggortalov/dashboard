@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Modal from '../components/Modal';
@@ -8,6 +8,7 @@ import suiteService from '../services/suiteService';
 import sectionService from '../services/sectionService';
 import caseService from '../services/caseService';
 import projectService from '../services/projectService';
+import { playConfirmation } from '../services/soundService';
 import './TestSuitePage.css';
 
 export default function TestSuitePage() {
@@ -15,6 +16,8 @@ export default function TestSuitePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const filterCategoryId = searchParams.get('categoryId') ? parseInt(searchParams.get('categoryId')) : null;
+  const newCaseId = searchParams.get('newCaseId') ? parseInt(searchParams.get('newCaseId')) : null;
+  const scrolledRef = useRef(false);
 
   const [project, setProject] = useState(null);
   const [suite, setSuite] = useState(null);
@@ -62,6 +65,22 @@ export default function TestSuitePage() {
   useEffect(() => { fetchData(); }, [projectId, suiteId]);
   useEffect(() => { fetchCases(); }, [projectId]);
 
+  // Scroll to newly created case
+  useEffect(() => {
+    if (newCaseId && cases.length > 0 && !scrolledRef.current) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`case-row-${newCaseId}`);
+        if (el) {
+          scrolledRef.current = true;
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('case-row--highlight');
+          playConfirmation();
+          setTimeout(() => el.classList.remove('case-row--highlight'), 2500);
+        }
+      });
+    }
+  }, [newCaseId, cases]);
+
   // Group cases by section_id + build section tree
   const grouped = useMemo(() => {
     const map = {};
@@ -107,6 +126,7 @@ export default function TestSuitePage() {
     setEditSection(null);
     setSectionParentId(null);
     fetchData();
+    window.__refreshSidebarProjects?.();
   };
 
   const handleDeleteSection = async () => {
@@ -116,6 +136,7 @@ export default function TestSuitePage() {
       setDeleteSection(null);
       fetchData();
       fetchCases();
+      window.__refreshSidebarProjects?.();
       // If we're in filtered view and deleted that category, go back to all categories
       if (filterCategoryId === deletedId) {
         navigate(`/projects/${projectId}/suites/${suiteId}`);
@@ -161,6 +182,7 @@ export default function TestSuitePage() {
       setSelectedCases(new Set());
       setShowBulkDelete(false);
       fetchCases();
+      window.__refreshSidebarProjects?.();
     } catch {
       setShowBulkDelete(false);
     }
@@ -225,6 +247,13 @@ export default function TestSuitePage() {
                 <button className="btn btn-secondary" onClick={() => navigate(suitePath)}>
                   All Categories
                 </button>
+                <button className="btn btn-secondary" onClick={() => {
+                  setSectionParentId(filterSection.id);
+                  setEditSection(null);
+                  setSectionName('');
+                  setSectionDescription('');
+                  setShowSectionModal(true);
+                }}>+ Subcategory</button>
                 <button className="btn btn-primary" onClick={() => {
                   navigate(`/projects/${projectId}/suites/${suiteId}/cases/new?sectionId=${filterSection.id}`);
                 }}>+ Test Case</button>
@@ -241,7 +270,7 @@ export default function TestSuitePage() {
                 )}
                 <div className="category-cases">
                   {filterCases.length > 0 ? filterCases.map((c) => (
-                    <div key={c.id} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => navigate(`/cases/${c.id}`)}>
+                    <div key={c.id} id={`case-row-${c.id}`} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => { if (window.getSelection().toString()) return; navigate(`/cases/${c.id}`); }}>
                       {selectionMode && <input type="checkbox" checked={selectedCases.has(c.id)} onChange={(e) => toggleCase(c.id, e)} onClick={(e) => e.stopPropagation()} className="case-checkbox" />}
                       <span className="case-row-id">C{String(c.id).padStart(7, '0')}</span>
                       <span className="case-row-title">{c.title}</span>
@@ -285,6 +314,7 @@ export default function TestSuitePage() {
                 {grouped.roots.map((sec) => {
                   const group = grouped.map[sec.id];
                   const children = grouped.childrenMap[sec.id] || [];
+                  const totalCases = group.cases.length + children.reduce((sum, sub) => sum + (grouped.map[sub.id]?.cases.length || 0), 0);
                   const isCollapsed = !!collapsed[sec.id];
                   return (
                     <div key={sec.id} id={`category-${sec.id}`} className="category-group">
@@ -295,7 +325,7 @@ export default function TestSuitePage() {
                         <div className="category-header-info">
                           <div className="category-header-top">
                             <span className="category-header-name">{sec.name}</span>
-                            <span className="category-header-count">{group.cases.length}</span>
+                            <span className="category-header-count">{totalCases}</span>
                           </div>
                           {sec.description && <span className="category-header-desc">{sec.description}</span>}
                         </div>
@@ -334,7 +364,7 @@ export default function TestSuitePage() {
                           )}
                           <div className="category-cases">
                             {group.cases.length > 0 ? group.cases.map((c) => (
-                              <div key={c.id} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => navigate(`/cases/${c.id}`)}>
+                              <div key={c.id} id={`case-row-${c.id}`} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => { if (window.getSelection().toString()) return; navigate(`/cases/${c.id}`); }}>
                                 {selectionMode && <input type="checkbox" checked={selectedCases.has(c.id)} onChange={(e) => toggleCase(c.id, e)} onClick={(e) => e.stopPropagation()} className="case-checkbox" />}
                                 <span className="case-row-id">C{String(c.id).padStart(7, '0')}</span>
                                 <span className="case-row-title">{c.title}</span>
@@ -389,7 +419,7 @@ export default function TestSuitePage() {
                                   )}
                                   <div className="category-cases subcategory-cases">
                                     {subGroup.cases.length > 0 ? subGroup.cases.map((c) => (
-                                      <div key={c.id} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => navigate(`/cases/${c.id}`)}>
+                                      <div key={c.id} id={`case-row-${c.id}`} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => { if (window.getSelection().toString()) return; navigate(`/cases/${c.id}`); }}>
                                         {selectionMode && <input type="checkbox" checked={selectedCases.has(c.id)} onChange={(e) => toggleCase(c.id, e)} onClick={(e) => e.stopPropagation()} className="case-checkbox" />}
                                         <span className="case-row-id">C{String(c.id).padStart(7, '0')}</span>
                                         <span className="case-row-title">{c.title}</span>
@@ -430,7 +460,7 @@ export default function TestSuitePage() {
                       )}
                       <div className="category-cases">
                         {grouped.uncategorized.map((c) => (
-                          <div key={c.id} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => navigate(`/cases/${c.id}`)}>
+                          <div key={c.id} id={`case-row-${c.id}`} className={`case-row ${selectedCases.has(c.id) ? 'case-row--selected' : ''}`} onClick={() => { if (window.getSelection().toString()) return; navigate(`/cases/${c.id}`); }}>
                             {selectionMode && <input type="checkbox" checked={selectedCases.has(c.id)} onChange={(e) => toggleCase(c.id, e)} onClick={(e) => e.stopPropagation()} className="case-checkbox" />}
                             <span className="case-row-id">C{String(c.id).padStart(7, '0')}</span>
                             <span className="case-row-title">{c.title}</span>

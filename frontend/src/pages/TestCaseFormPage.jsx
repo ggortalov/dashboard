@@ -91,10 +91,13 @@ export default function TestCaseFormPage() {
       };
       if (isEdit) {
         await caseService.update(caseId, data);
+        window.__refreshSidebarProjects?.();
+        navigate(`/projects/${projectId}/suites/${suiteId}`);
       } else {
-        await caseService.create(data);
+        const created = await caseService.create(data);
+        window.__refreshSidebarProjects?.();
+        navigate(`/projects/${projectId}/suites/${suiteId}?newCaseId=${created.id}`);
       }
-      navigate(`/projects/${projectId}/suites/${suiteId}`);
     } catch (err) {
       const msg = err.response?.data?.error || 'Failed to save test case';
       setError(msg);

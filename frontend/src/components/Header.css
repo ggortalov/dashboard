@@ -43,3 +43,10 @@
   font-weight: 600;
   color: var(--text-primary);
 }
+
+/* Mobile: shift breadcrumbs right to clear hamburger button */
+@media (max-width: 768px) {
+  .app-header {
+    padding-left: 56px;
+  }
+}

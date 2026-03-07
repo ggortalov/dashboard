@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from app import db
 from app.models import User, TokenBlocklist
 
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "bmp", "svg"}
 
 EMAIL_RE = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9_.-]+$")
@@ -26,16 +26,17 @@ def allowed_file(filename):
 
 
 def validate_password(password):
-    """Return an error message if the password is too weak, else None."""
+    """Return a list of error messages for all failing requirements, or empty list."""
+    errors = []
     if len(password) < MIN_PASSWORD_LENGTH:
-        return f"Password must be at least {MIN_PASSWORD_LENGTH} characters long"
+        errors.append(f"At least {MIN_PASSWORD_LENGTH} characters long")
     if not re.search(r"[A-Z]", password):
-        return "Password must contain at least one uppercase letter"
+        errors.append("At least one uppercase letter")
     if not re.search(r"[a-z]", password):
-        return "Password must contain at least one lowercase letter"
+        errors.append("At least one lowercase letter")
     if not re.search(r"[0-9]", password):
-        return "Password must contain at least one digit"
-    return None
+        errors.append("At least one digit")
+    return errors
 
 
 def validate_username(username):
@@ -80,9 +81,9 @@ def register():
         return jsonify({"error": err}), 400
 
     # Validate password strength
-    err = validate_password(password)
-    if err:
-        return jsonify({"error": err}), 400
+    pw_errors = validate_password(password)
+    if pw_errors:
+        return jsonify({"error": "Password does not meet requirements", "password_errors": pw_errors}), 400
 
     # Use a generic message to prevent username/email enumeration
     if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
@@ -148,7 +149,7 @@ def upload_avatar():
         return jsonify({"error": "No file selected"}), 400
 
     if not allowed_file(file.filename):
-        return jsonify({"error": "Only JPEG and PNG files are allowed"}), 400
+        return jsonify({"error": "Only image files are allowed (JPEG, PNG, GIF, WebP, BMP, SVG)"}), 400
 
     filename = secure_filename(file.filename)
     ext = filename.rsplit(".", 1)[1].lower()

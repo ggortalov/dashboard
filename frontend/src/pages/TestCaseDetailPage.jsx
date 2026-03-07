@@ -132,6 +132,7 @@ export default function TestCaseDetailPage() {
         onConfirm={handleDelete}
         title="Delete Test Case"
         message={`"${tc.title}" will be permanently deleted. This cannot be undone.`}
+        requireSafeguard
       />
     </div>
   );
