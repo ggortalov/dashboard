@@ -1,14 +1,14 @@
 # StyleSeat Guardian
 
-A TestRail-like test management web application built with a React frontend and Flask REST API backend. Organize test suites, manage test cases with steps, execute test runs, and track results with visual dashboards.
+StyleSeat's internal test management platform built to support the QA workflows and quality standards of the StyleSeat engineering team. Guardian provides a centralized hub for organizing test suites, authoring test cases, executing test runs, and tracking results — all tailored to how StyleSeat ships software.
 
 ## Features
 
-- **Project Management** — Create and manage multiple testing projects
-- **Test Suites & Sections** — Organize test cases into suites with a hierarchical section tree
-- **Test Cases** — Define cases with type, priority, preconditions, and step-by-step instructions (stored as structured JSON)
-- **Test Runs & Execution** — Create runs from suites, execute cases one by one with status tracking (Passed / Failed / Blocked / Retest / Untested)
-- **Dashboard & Charts** — Global and per-project dashboards with doughnut charts for result distribution
+- **Project Management** — Organize testing efforts across StyleSeat projects and initiatives
+- **Test Suites & Sections** — Structure test cases into suites with a hierarchical section tree that mirrors product areas
+- **Test Cases** — Author cases with type, priority, preconditions, and step-by-step instructions for consistent coverage across the team
+- **Test Runs & Execution** — Launch runs from suites, execute cases one by one with status tracking (Passed / Failed / Blocked / Retest / Untested)
+- **Dashboard & Charts** — Global and per-project dashboards with doughnut charts for real-time quality visibility
 - **User Authentication** — JWT-based auth with registration, login, and avatar upload
 - **Responsive Design** — Collapsible sidebar, mobile hamburger menu, DM Sans typography, animated UI
 
@@ -147,4 +147,4 @@ npm run build        # Output in dist/
 
 ## License
 
-Private project.
+Internal StyleSeat project. Not for external distribution.
